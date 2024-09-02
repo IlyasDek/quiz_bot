@@ -1,0 +1,52 @@
+[
+    {
+        "question": "Что такое Python?",
+        "options": ["Язык программирования", "Тип данных", "Музыкальный инструмент", "Змея на английском"],
+        "correct_option": 0
+    },
+    {
+        "question": "Какой тип данных используется для хранения целых чисел?",
+        "options": ["int", "float", "str", "natural"],
+        "correct_option": 0
+    },
+    {
+        "question": "Какой оператор используется для возведения в степень в Python?",
+        "options": ["^", "**", "//", "%"],
+        "correct_option": 1
+    },
+    {
+        "question": "Что делает функция len() в Python?",
+        "options": ["Возвращает длину объекта", "Удаляет объект", "Создает объект", "Изменяет объект"],
+        "correct_option": 0
+    },
+    {
+        "question": "Как создать комментарий в Python?",
+        "options": ["//", "#", "/*", "<!-- -->"],
+        "correct_option": 1
+    },
+    {
+        "question": "Какой метод используется для добавления элемента в конец списка?",
+        "options": [".append()", ".insert()", ".add()", ".push()"],
+        "correct_option": 0
+    },
+    {
+        "question": "Какой цикл используется для итерации по последовательности?",
+        "options": ["while", "for", "loop", "iterate"],
+        "correct_option": 1
+    },
+    {
+        "question": "Какая функция используется для вывода текста в консоль в Python?",
+        "options": ["print()", "echo()", "console.log()", "write()"],
+        "correct_option": 0
+    },    
+    {
+        "question": "Как объявить функцию в Python?",
+        "options": ["function myFunc()", "def myFunc()", "create myFunc()", "fun myFunc()"],
+        "correct_option": 1
+    },
+    {
+        "question": "Какой метод используется для сортировки списка?",
+        "options": [".sort()", ".order()", ".arrange()", ".shuffle()"],
+        "correct_option": 0
+    }
+]
