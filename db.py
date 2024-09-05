@@ -42,3 +42,9 @@ async def save_quiz_result(user_id, correct_answers):
         await db.execute('INSERT OR REPLACE INTO quiz_results (user_id, correct_answers) VALUES (?, ?)', 
                          (user_id, correct_answers))
         await db.commit()
+
+async def update_correct_answers(user_id, correct_answers):
+    async with aiosqlite.connect(DB_NAME) as db:
+        await db.execute('INSERT OR REPLACE INTO quiz_results (user_id, correct_answers) VALUES (?, ?)', 
+                         (user_id, correct_answers))
+        await db.commit()

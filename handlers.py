@@ -1,9 +1,9 @@
 from aiogram import Dispatcher, types
 from aiogram.filters.command import Command
-from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from aiogram import F
-from quiz import quiz_data, get_question, generate_options_keyboard
-from db import get_quiz_index, update_quiz_index, save_quiz_result, get_user_stats
+from quiz import quiz_data, get_question
+from db import update_quiz_index, update_correct_answers, get_user_stats, get_quiz_index
 
 def register_handlers(dp: Dispatcher):
     @dp.message(Command("start"))
@@ -17,7 +17,7 @@ def register_handlers(dp: Dispatcher):
     @dp.message(Command("quiz"))
     async def cmd_quiz(message: types.Message):
         await message.answer(f"Давайте начнем квиз!")
-        await new_quiz(message, correct_answers=0)
+        await new_quiz(message)
 
     @dp.message(F.text == "Статистика")
     async def cmd_stats(message: types.Message):
@@ -30,8 +30,12 @@ def register_handlers(dp: Dispatcher):
 
     @dp.callback_query(F.data.startswith("right_answer"))
     async def right_answer(callback: types.CallbackQuery):
-        correct_answers = int(callback.data.split(':')[1])  # Извлекаем количество правильных ответов
+        user_id = callback.from_user.id
+
+        correct_answers = await get_user_stats(user_id) or 0
         correct_answers += 1
+        await update_correct_answers(user_id, correct_answers)  # Обновляем в базе данных
+
         await callback.bot.edit_message_reply_markup(
             chat_id=callback.from_user.id,
             message_id=callback.message.message_id,
@@ -39,19 +43,19 @@ def register_handlers(dp: Dispatcher):
         )
         await callback.message.answer("Верно!")
 
-        current_question_index = await get_quiz_index(callback.from_user.id)
+        current_question_index = await get_quiz_index(user_id)
         current_question_index += 1
-        await update_quiz_index(callback.from_user.id, current_question_index)
+        await update_quiz_index(user_id, current_question_index)
 
         if current_question_index < len(quiz_data):
-            await get_question(callback.message, callback.from_user.id, correct_answers)
+            await get_question(callback.message, user_id)
         else:
-            await save_quiz_result(callback.from_user.id, correct_answers)
             await callback.message.answer(f"Это был последний вопрос. Квиз завершен! Правильных ответов: {correct_answers}")
 
     @dp.callback_query(F.data.startswith("wrong_answer"))
     async def wrong_answer(callback: types.CallbackQuery):
-        correct_answers = int(callback.data.split(':')[1])  # Извлекаем количество правильных ответов
+        user_id = callback.from_user.id
+
         await callback.bot.edit_message_reply_markup(
             chat_id=callback.from_user.id,
             message_id=callback.message.message_id,
@@ -59,21 +63,21 @@ def register_handlers(dp: Dispatcher):
         )
         await callback.message.answer("Неправильно.")
 
-        current_question_index = await get_quiz_index(callback.from_user.id)
+        current_question_index = await get_quiz_index(user_id)
         correct_option = quiz_data[current_question_index]['correct_option']
         await callback.message.answer(f"Правильный ответ: {quiz_data[current_question_index]['options'][correct_option]}")
 
         current_question_index += 1
-        await update_quiz_index(callback.from_user.id, current_question_index)
+        await update_quiz_index(user_id, current_question_index)
 
         if current_question_index < len(quiz_data):
-            await get_question(callback.message, callback.from_user.id, correct_answers)
+            await get_question(callback.message, user_id)
         else:
-            await save_quiz_result(callback.from_user.id, correct_answers)
-            await callback.message.answer(f"Это был последний вопрос. Квиз завершен! Правильных ответов: {correct_answers}")
+            await callback.message.answer(f"Это был последний вопрос. Квиз завершен!")
 
-async def new_quiz(message, correct_answers=0):
+async def new_quiz(message):
     user_id = message.from_user.id
     current_question_index = 0
     await update_quiz_index(user_id, current_question_index)
-    await get_question(message, user_id, correct_answers)
+    await update_correct_answers(user_id, 0)
+    await get_question(message, user_id)
